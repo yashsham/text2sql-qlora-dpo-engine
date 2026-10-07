@@ -138,7 +138,6 @@ def run_dpo():
         bf16=(compute_dtype == torch.bfloat16),
         fp16=(compute_dtype == torch.float16),
         max_length=config.max_seq_length,
-        max_prompt_length=config.max_prompt_length,
         remove_unused_columns=False,
     )
 
