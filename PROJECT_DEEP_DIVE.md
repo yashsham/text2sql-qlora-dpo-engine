@@ -1,4 +1,4 @@
-﻿# Enterprise Text-to-SQL Alignment Engine: The Complete Deep Dive
+# Enterprise Text-to-SQL Alignment Engine: The Complete Deep Dive
 
 > **A comprehensive Why, What, and How technical architecture breakdown and senior AI/ML interview masterclass.**
 
@@ -34,7 +34,7 @@ Instead of treating fine-tuning as a black-box script, this project demonstrates
 2. **Stage 1 (QLoRA SFT)**: Supervised Fine-Tuning on 4-bit NF4 weights to teach DDL schema parsing and SQL translation.
 3. **Stage 2 (QLoRA DPO)**: Direct Preference Optimization aligning query policy against full-table scans, dialect errors, and destructive commands.
 4. **Verifiable Objective Evaluation**: In-memory SQLite execution benchmark measuring Execution Accuracy (EX %) and `EXPLAIN QUERY PLAN` B-Tree index utilization.
-5. **Production Serving**: Fast, interactive developer dashboard powered by FastAPI, Tailwind CSS, and Prism.js.
+5. **Production Serving**: Fast, interactive developer dashboard deployed globally on **Cloudflare Pages** at **[text2sql-qlora-dpo-engine.pages.dev](https://text2sql-qlora-dpo-engine.pages.dev)**, with a local FastAPI backend.
 
 ---
 

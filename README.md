@@ -1,5 +1,6 @@
 # Enterprise SQL Assistant: 2-Stage Post-Training Pipeline (QLoRA + DPO)
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-text2sql--qlora--dpo--engine.pages.dev-success?style=for-the-badge&logo=cloudflare)](https://text2sql-qlora-dpo-engine.pages.dev)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.111.0-009688.svg)](https://fastapi.tiangolo.com)
 [![PEFT](https://img.shields.io/badge/PEFT-0.12.0-yellow.svg)](https://github.com/huggingface/peft)
@@ -10,6 +11,7 @@
 
 An end-to-end, production-oriented post-training and alignment pipeline that adapts open-source language models (e.g., `Qwen/Qwen2.5-Coder-7B-Instruct` or `meta-llama/Llama-3.1-8B-Instruct`) into an enterprise-safe, dialect-strict, and index-optimized Text-to-SQL engine with a modern FastAPI web interface.
 
+> 🌐 **Live Interactive App (24/7 Global Edge)**: **[text2sql-qlora-dpo-engine.pages.dev](https://text2sql-qlora-dpo-engine.pages.dev)**  
 > 📖 **[Read the Complete Why, What, How & Senior AI Interview Guide (PROJECT_DEEP_DIVE.md)](PROJECT_DEEP_DIVE.md)** for a deep mathematical derivation of DPO, QLoRA NF4 quantization trade-offs, and top 10 interview questions.
 
 ---
@@ -121,17 +123,15 @@ python eval/evaluate_execution.py
 
 ## 24/7 Global Deployment (Cloudflare Pages & Workers)
 
-The repository is pre-configured with **Cloudflare Pages Functions** (`functions/api/`) and `wrangler.toml` for 100% free, zero-cold-start global edge deployment across 300+ cities:
+The dashboard is deployed globally on **Cloudflare Pages** with serverless edge functions (`functions/api/`) offering instant load times and zero cold starts worldwide:
 
-1. Log in to [Cloudflare Dashboard](https://dash.cloudflare.com/) and go to **Compute (Workers & Pages)** -> **Create application** -> **Pages**.
-2. Click **Connect to Git** and select `yashsham/text2sql-qlora-dpo-engine`.
-3. In the build settings:
-   - **Framework preset**: `None`
-   - **Build command**: *(Leave blank)*
-   - **Build output directory**: `app/static`
-4. Click **Save and Deploy**.
+👉 **Production Live URL**: **[https://text2sql-qlora-dpo-engine.pages.dev](https://text2sql-qlora-dpo-engine.pages.dev)**
 
-Within 30 seconds, Cloudflare will deploy both the modern UI and edge API functions to `https://text2sql-qlora-dpo-engine.pages.dev/` with 24/7 global uptime!
+To redeploy or deploy from your own Cloudflare account:
+```bash
+# Deploy instantly using Cloudflare Wrangler CLI:
+npx wrangler pages deploy app/static --project-name text2sql-qlora-dpo-engine
+```
 
 ---
 
