@@ -3,12 +3,11 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Model outputs & checkpoints (too large for git)
-outputs/
+# Exclude files exceeding GitHub 100MB limit
+outputs/dpo_adapter/ref/
+outputs/sft_adapter/
 checkpoint-*/
-*.bin
 *.pt
-*.safetensors
 *.gguf
 
 # Environments & virtualenvs
