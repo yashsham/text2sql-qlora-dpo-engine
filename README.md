@@ -1,4 +1,4 @@
-﻿# Enterprise SQL Assistant: 2-Stage Post-Training Pipeline (QLoRA + DPO)
+# Enterprise SQL Assistant: 2-Stage Post-Training Pipeline (QLoRA + DPO)
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.111.0-009688.svg)](https://fastapi.tiangolo.com)
@@ -17,25 +17,25 @@ Standard fine-tuning often teaches models how to output SQL syntax, but fails to
 
 ```mermaid
 flowchart TD
-    subgraph Data["1. Data Engine (Web & Offline)"]
-        HF["Hugging Face Benchmark<br/>(b-mc2/sql-create-context 78k+)"] --> Prep["Data Pipeline & Perturbation Engine"]
-        Curated["Enterprise Schemas<br/>(E-Commerce & General Ledger)"] --> Prep
-        Prep --> SFT_Data["SFT Dataset<br/>(DDL + Question -> Gold SQL)"]
-        Prep --> DPO_Data["DPO Triplet Dataset<br/>(Prompt, Chosen, Rejected)"]
+    subgraph Data ["1. Data Engine"]
+        HF["Hugging Face Benchmark: b-mc2/sql-create-context"] --> Prep["Data Pipeline and Perturbation Engine"]
+        Curated["Enterprise Schemas: E-Commerce and General Ledger"] --> Prep
+        Prep --> SFT_Data["SFT Dataset: DDL and Question to Gold SQL"]
+        Prep --> DPO_Data["DPO Triplet Dataset: Prompt, Chosen, Rejected"]
     end
 
-    subgraph Train["2. Post-Training Pipeline"]
-        Base["Base Model<br/>(4-bit NF4 Quantized)"] --> SFT_Stage["Stage 1: QLoRA SFT<br/>(TRL SFTTrainer)"]
+    subgraph Train ["2. Post-Training Pipeline"]
+        Base["Base Model: 4-bit NF4 Quantized"] --> SFT_Stage["Stage 1: QLoRA SFT via TRL SFTTrainer"]
         SFT_Data --> SFT_Stage
         SFT_Stage --> SFT_Weights["SFT LoRA Adapter"]
-        SFT_Weights --> DPO_Stage["Stage 2: QLoRA DPO<br/>(TRL DPOTrainer, beta=0.1)"]
+        SFT_Weights --> DPO_Stage["Stage 2: QLoRA DPO via TRL DPOTrainer"]
         DPO_Data --> DPO_Stage
         DPO_Stage --> Final_Model["Aligned Production Weights"]
     end
 
-    subgraph Eval["3. Verifiable Evaluation & Serving"]
-        Final_Model --> Test_Runner["In-Memory SQLite Sandbox<br/>(EX %, Query Plan, Refusal)"]
-        Final_Model --> Modern_UI["Modern FastAPI Web Dashboard<br/>(Side-by-side SQL Diff & Live Execution)"]
+    subgraph Eval ["3. Verifiable Evaluation and Serving"]
+        Final_Model --> Test_Runner["In-Memory SQLite Sandbox (EX percent, Query Plan, Refusal)"]
+        Final_Model --> Modern_UI["Modern FastAPI Web Dashboard (Side-by-side SQL Diff)"]
     end
 ```
 
