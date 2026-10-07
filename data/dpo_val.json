@@ -1,0 +1,114 @@
+[
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE weather (zip_code VARCHAR, max_wind_Speed_mph VARCHAR)\n\nQuestion: For each zip code, return how many times max wind speed reached 25?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT zip_code, COUNT(*) FROM weather WHERE max_wind_Speed_mph >= 25 GROUP BY zip_code<|im_end|>",
+    "rejected": "SELECT * FROM weather WHERE max_wind_Speed_mph >= 25 GROUP BY zip_code<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE weather (date VARCHAR, zip_code VARCHAR, min_dew_point_f INTEGER)\n\nQuestion: On which day and in which zip code was the min dew point lower than any day in zip code 94107?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT date, zip_code FROM weather WHERE min_dew_point_f < (SELECT MIN(min_dew_point_f) FROM weather WHERE zip_code = 94107)<|im_end|>",
+    "rejected": "SELECT * FROM weather WHERE min_dew_point_f < (SELECT MIN(min_dew_point_f) FROM weather WHERE zip_code = 94107)<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE station (installation_date VARCHAR, id VARCHAR); CREATE TABLE trip (id VARCHAR, end_station_id VARCHAR)\n\nQuestion: For each trip, return its ending station's installation date.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT T1.id, T2.installation_date FROM trip AS T1 JOIN station AS T2 ON T1.end_station_id = T2.id<|im_end|>",
+    "rejected": "SELECT T1.id, T2.installation_date FROM trip AS T1 JOIN station AS T2 ON T1.end_station_id = T2.id<|im_end|>",
+    "category": "implicit_join_cartesian",
+    "reason": "Converts explicit JOIN to unindexed comma join."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE trip (id VARCHAR, start_station_id VARCHAR); CREATE TABLE station (id VARCHAR, dock_count VARCHAR)\n\nQuestion: Which trip started from the station with the largest dock count? Give me the trip id.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT T1.id FROM trip AS T1 JOIN station AS T2 ON T1.start_station_id = T2.id ORDER BY T2.dock_count DESC LIMIT 1<|im_end|>",
+    "rejected": "SELECT T1.id FROM trip AS T1 JOIN station AS T2 ON T1.start_station_id = T2.id ORDER BY T2.dock_count DESC LIMIT 1<|im_end|>",
+    "category": "implicit_join_cartesian",
+    "reason": "Converts explicit JOIN to unindexed comma join."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE trip (end_station_id VARCHAR); CREATE TABLE station (id VARCHAR, city VARCHAR)\n\nQuestion: Count the number of trips that did not end in San Francisco city.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT COUNT(*) FROM trip AS T1 JOIN station AS T2 ON T1.end_station_id = T2.id WHERE T2.city <> \"San Francisco\"<|im_end|>",
+    "rejected": "SELECT COUNT(*) FROM trip AS T1 JOIN station AS T2 ON T1.end_station_id = T2.id WHERE T2.city <> \"San Francisco\"<|im_end|>",
+    "category": "implicit_join_cartesian",
+    "reason": "Converts explicit JOIN to unindexed comma join."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE weather (date VARCHAR, EVENTS VARCHAR, zip_code VARCHAR)\n\nQuestion: In zip code 94107, on which day neither Fog nor Rain was not observed?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT date FROM weather WHERE zip_code = 94107 AND EVENTS <> \"Fog\" AND EVENTS <> \"Rain\"<|im_end|>",
+    "rejected": "SELECT * FROM weather WHERE zip_code = 94107 AND EVENTS <> \"Fog\" AND EVENTS <> \"Rain\"<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE status (id VARCHAR, station_id VARCHAR, lat INTEGER, bikes_available INTEGER); CREATE TABLE station (id VARCHAR, station_id VARCHAR, lat INTEGER, bikes_available INTEGER)\n\nQuestion: What are the ids of stations that have latitude above 37.4 and never had bike availability below 7?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT id FROM station WHERE lat > 37.4 EXCEPT SELECT station_id FROM status GROUP BY station_id HAVING MIN(bikes_available) < 7<|im_end|>",
+    "rejected": "SELECT * FROM station WHERE lat > 37.4 EXCEPT SELECT station_id FROM status GROUP BY station_id HAVING MIN(bikes_available) < 7<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE station (name VARCHAR, id VARCHAR); CREATE TABLE status (station_id VARCHAR); CREATE TABLE station (name VARCHAR, city VARCHAR, bikes_available INTEGER)\n\nQuestion: What are names of stations that have average bike availability above 10 and are not located in San Jose city?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT T1.name FROM station AS T1 JOIN status AS T2 ON T1.id = T2.station_id GROUP BY T2.station_id HAVING AVG(bikes_available) > 10 EXCEPT SELECT name FROM station WHERE city = \"San Jose\"<|im_end|>",
+    "rejected": "SELECT T1.name FROM station AS T1 JOIN status AS T2 ON T1.id = T2.station_id GROUP BY T2.station_id HAVING AVG(bikes_available) > 10 EXCEPT SELECT name FROM station WHERE city = \"San Jose\"<|im_end|>",
+    "category": "implicit_join_cartesian",
+    "reason": "Converts explicit JOIN to unindexed comma join."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE station (name VARCHAR, lat VARCHAR, city VARCHAR)\n\nQuestion: What are the name, latitude, and city of the station with the lowest latitude?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT name, lat, city FROM station ORDER BY lat LIMIT 1<|im_end|>",
+    "rejected": "SELECT * FROM station ORDER BY lat LIMIT 1<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE weather (date VARCHAR, mean_temperature_f VARCHAR, mean_humidity VARCHAR, max_gust_speed_mph VARCHAR)\n\nQuestion: What are the date, mean temperature and mean humidity for the top 3 days with the largest max gust speeds?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT date, mean_temperature_f, mean_humidity FROM weather ORDER BY max_gust_speed_mph DESC LIMIT 3<|im_end|>",
+    "rejected": "SELECT * FROM weather ORDER BY max_gust_speed_mph DESC LIMIT 3<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE station (city VARCHAR)\n\nQuestion: List the name and the number of stations for all the cities that have at least 15 stations.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT city, COUNT(*) FROM station GROUP BY city HAVING COUNT(*) >= 15<|im_end|>",
+    "rejected": "SELECT * FROM station GROUP BY city HAVING COUNT(*) >= 15<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE trip (start_station_id VARCHAR, start_station_name VARCHAR)\n\nQuestion: Find the ids and names of stations from which at least 200 trips started.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT start_station_id, start_station_name FROM trip GROUP BY start_station_name HAVING COUNT(*) >= 200<|im_end|>",
+    "rejected": "SELECT * FROM trip GROUP BY start_station_name HAVING COUNT(*) >= 200<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE weather (zip_code VARCHAR, mean_visibility_miles INTEGER)\n\nQuestion: Find the zip code in which the average mean visibility is lower than 10.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT zip_code FROM weather GROUP BY zip_code HAVING AVG(mean_visibility_miles) < 10<|im_end|>",
+    "rejected": "SELECT * FROM weather GROUP BY zip_code HAVING AVG(mean_visibility_miles) < 10<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE customers (\n    customer_id INTEGER PRIMARY KEY,\n    full_name TEXT NOT NULL,\n    email TEXT UNIQUE NOT NULL,\n    tier TEXT CHECK(tier IN ('bronze', 'silver', 'gold', 'platinum')),\n    country TEXT NOT NULL,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);\n\nCREATE TABLE products (\n    product_id INTEGER PRIMARY KEY,\n    name TEXT NOT NULL,\n    category TEXT NOT NULL,\n    price DECIMAL(10,2) NOT NULL,\n    stock_quantity INTEGER NOT NULL,\n    is_active BOOLEAN DEFAULT 1\n);\n\nCREATE TABLE orders (\n    order_id INTEGER PRIMARY KEY,\n    customer_id INTEGER NOT NULL,\n    order_status TEXT CHECK(order_status IN ('pending', 'processing', 'completed', 'cancelled', 'refunded')),\n    total_amount DECIMAL(10,2) NOT NULL,\n    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)\n);\n\nCREATE TABLE order_items (\n    item_id INTEGER PRIMARY KEY,\n    order_id INTEGER NOT NULL,\n    product_id INTEGER NOT NULL,\n    quantity INTEGER NOT NULL,\n    unit_price DECIMAL(10,2) NOT NULL,\n    FOREIGN KEY (order_id) REFERENCES orders(order_id),\n    FOREIGN KEY (product_id) REFERENCES products(product_id)\n);\nCREATE INDEX idx_orders_customer_date ON orders(customer_id, order_date);\nCREATE INDEX idx_customers_tier ON customers(tier);\nCREATE INDEX idx_products_category ON products(category);\n\nQuestion: Find all completed orders placed in 2024 with total amount exceeding $500.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT order_id, customer_id, total_amount, order_date FROM orders WHERE order_status = 'completed' AND order_date >= '2024-01-01 00:00:00' AND order_date < '2025-01-01 00:00:00' AND total_amount > 500.00 ORDER BY order_date DESC;<|im_end|>",
+    "rejected": "SELECT * FROM orders WHERE order_status = 'completed' AND strftime('%Y', order_date) = '2024' AND total_amount > 500.00;<|im_end|>",
+    "category": "sargability_and_projection",
+    "reason": "Rejected uses strftime preventing index usage and uses SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE customers (\n    customer_id INTEGER PRIMARY KEY,\n    full_name TEXT NOT NULL,\n    email TEXT UNIQUE NOT NULL,\n    tier TEXT CHECK(tier IN ('bronze', 'silver', 'gold', 'platinum')),\n    country TEXT NOT NULL,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);\n\nCREATE TABLE products (\n    product_id INTEGER PRIMARY KEY,\n    name TEXT NOT NULL,\n    category TEXT NOT NULL,\n    price DECIMAL(10,2) NOT NULL,\n    stock_quantity INTEGER NOT NULL,\n    is_active BOOLEAN DEFAULT 1\n);\n\nCREATE TABLE orders (\n    order_id INTEGER PRIMARY KEY,\n    customer_id INTEGER NOT NULL,\n    order_status TEXT CHECK(order_status IN ('pending', 'processing', 'completed', 'cancelled', 'refunded')),\n    total_amount DECIMAL(10,2) NOT NULL,\n    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)\n);\n\nCREATE TABLE order_items (\n    item_id INTEGER PRIMARY KEY,\n    order_id INTEGER NOT NULL,\n    product_id INTEGER NOT NULL,\n    quantity INTEGER NOT NULL,\n    unit_price DECIMAL(10,2) NOT NULL,\n    FOREIGN KEY (order_id) REFERENCES orders(order_id),\n    FOREIGN KEY (product_id) REFERENCES products(product_id)\n);\nCREATE INDEX idx_orders_customer_date ON orders(customer_id, order_date);\nCREATE INDEX idx_customers_tier ON customers(tier);\nCREATE INDEX idx_products_category ON products(category);\n\nQuestion: Drop the orders table and remove all customer data immediately.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "-- REFUSAL: Destructive DDL/DML operation detected.\n-- Dropping tables or executing bulk unconstrained deletes is prohibited in production.<|im_end|>",
+    "rejected": "DROP TABLE orders;\nDELETE FROM customers;<|im_end|>",
+    "category": "safety_refusal",
+    "reason": "Rejected executes destructive commands that delete production data without authorization."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE accounts (\n    account_id INTEGER PRIMARY KEY,\n    account_code TEXT UNIQUE NOT NULL,\n    account_name TEXT NOT NULL,\n    account_type TEXT CHECK(account_type IN ('asset', 'liability', 'equity', 'revenue', 'expense')),\n    currency TEXT DEFAULT 'USD'\n);\n\nCREATE TABLE journal_entries (\n    entry_id INTEGER PRIMARY KEY,\n    reference_no TEXT UNIQUE NOT NULL,\n    entry_date DATE NOT NULL,\n    description TEXT,\n    fiscal_year INTEGER NOT NULL,\n    is_posted BOOLEAN DEFAULT 0\n);\n\nCREATE TABLE entry_lines (\n    line_id INTEGER PRIMARY KEY,\n    entry_id INTEGER NOT NULL,\n    account_id INTEGER NOT NULL,\n    debit_amount DECIMAL(14,2) DEFAULT 0.00,\n    credit_amount DECIMAL(14,2) DEFAULT 0.00,\n    FOREIGN KEY (entry_id) REFERENCES journal_entries(entry_id),\n    FOREIGN KEY (account_id) REFERENCES accounts(account_id)\n);\nCREATE INDEX idx_journal_date ON journal_entries(entry_date, fiscal_year);\nCREATE INDEX idx_lines_account ON entry_lines(account_id);\n\nQuestion: Check total debits and credits for fiscal year 2024 to verify trial balance.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT SUM(el.debit_amount) AS total_debits, SUM(el.credit_amount) AS total_credits FROM entry_lines el INNER JOIN journal_entries je ON el.entry_id = je.entry_id WHERE je.fiscal_year = 2024 AND je.is_posted = 1;<|im_end|>",
+    "rejected": "SELECT SUM(debit_amount), SUM(credit_amount) FROM entry_lines, journal_entries WHERE fiscal_year = 2024;<|im_end|>",
+    "category": "cartesian_product",
+    "reason": "Rejected creates an unjoined Cartesian product."
+  }
+]

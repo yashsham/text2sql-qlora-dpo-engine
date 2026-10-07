@@ -1,0 +1,49 @@
+{
+  "ecommerce": {
+    "db_id": "ecommerce",
+    "description": "Enterprise E-Commerce SaaS platform tracking customers, orders, order items, and products",
+    "ddl": "CREATE TABLE customers (\n    customer_id INTEGER PRIMARY KEY,\n    full_name TEXT NOT NULL,\n    email TEXT UNIQUE NOT NULL,\n    tier TEXT CHECK(tier IN ('bronze', 'silver', 'gold', 'platinum')),\n    country TEXT NOT NULL,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);\n\nCREATE TABLE products (\n    product_id INTEGER PRIMARY KEY,\n    name TEXT NOT NULL,\n    category TEXT NOT NULL,\n    price DECIMAL(10,2) NOT NULL,\n    stock_quantity INTEGER NOT NULL,\n    is_active BOOLEAN DEFAULT 1\n);\n\nCREATE TABLE orders (\n    order_id INTEGER PRIMARY KEY,\n    customer_id INTEGER NOT NULL,\n    order_status TEXT CHECK(order_status IN ('pending', 'processing', 'completed', 'cancelled', 'refunded')),\n    total_amount DECIMAL(10,2) NOT NULL,\n    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)\n);\n\nCREATE TABLE order_items (\n    item_id INTEGER PRIMARY KEY,\n    order_id INTEGER NOT NULL,\n    product_id INTEGER NOT NULL,\n    quantity INTEGER NOT NULL,\n    unit_price DECIMAL(10,2) NOT NULL,\n    FOREIGN KEY (order_id) REFERENCES orders(order_id),\n    FOREIGN KEY (product_id) REFERENCES products(product_id)\n);\nCREATE INDEX idx_orders_customer_date ON orders(customer_id, order_date);\nCREATE INDEX idx_customers_tier ON customers(tier);\nCREATE INDEX idx_products_category ON products(category);",
+    "sample_inserts": [
+      "INSERT INTO customers VALUES (1, 'Alice Smith', 'alice@corp.com', 'platinum', 'USA', '2023-01-15 08:30:00');",
+      "INSERT INTO customers VALUES (2, 'Bob Jones', 'bob@acme.com', 'gold', 'UK', '2023-03-22 14:10:00');",
+      "INSERT INTO customers VALUES (3, 'Charlie Brown', 'charlie@gmail.com', 'silver', 'USA', '2024-02-10 11:00:00');",
+      "INSERT INTO customers VALUES (4, 'Diana Prince', 'diana@themyscira.org', 'platinum', 'Canada', '2024-05-18 16:45:00');",
+      "INSERT INTO customers VALUES (5, 'Evan Wright', 'evan@wright.io', 'bronze', 'Germany', '2024-06-01 09:15:00');",
+      "INSERT INTO products VALUES (101, 'Cloud Server Pro', 'Cloud Services', 499.99, 50, 1);",
+      "INSERT INTO products VALUES (102, 'Data Analytics Suite', 'Software', 1299.00, 25, 1);",
+      "INSERT INTO products VALUES (103, 'Security Audit Addon', 'Security', 250.00, 100, 1);",
+      "INSERT INTO products VALUES (104, 'Legacy Support Pack', 'Support', 150.00, 0, 0);",
+      "INSERT INTO orders VALUES (1001, 1, 'completed', 1798.99, '2024-03-10 10:00:00');",
+      "INSERT INTO orders VALUES (1002, 1, 'completed', 499.99, '2024-05-12 12:30:00');",
+      "INSERT INTO orders VALUES (1003, 2, 'completed', 1299.00, '2024-04-01 09:00:00');",
+      "INSERT INTO orders VALUES (1004, 3, 'pending', 250.00, '2024-06-15 15:20:00');",
+      "INSERT INTO orders VALUES (1005, 4, 'cancelled', 499.99, '2024-05-20 18:00:00');",
+      "INSERT INTO order_items VALUES (1, 1001, 101, 1, 499.99);",
+      "INSERT INTO order_items VALUES (2, 1001, 102, 1, 1299.00);",
+      "INSERT INTO order_items VALUES (3, 1002, 101, 1, 499.99);",
+      "INSERT INTO order_items VALUES (4, 1003, 102, 1, 1299.00);",
+      "INSERT INTO order_items VALUES (5, 1004, 103, 1, 250.00);"
+    ]
+  },
+  "finance_ledger": {
+    "db_id": "finance_ledger",
+    "description": "Corporate General Ledger tracking accounts, fiscal quarters, journal entries, and reconciliations",
+    "ddl": "CREATE TABLE accounts (\n    account_id INTEGER PRIMARY KEY,\n    account_code TEXT UNIQUE NOT NULL,\n    account_name TEXT NOT NULL,\n    account_type TEXT CHECK(account_type IN ('asset', 'liability', 'equity', 'revenue', 'expense')),\n    currency TEXT DEFAULT 'USD'\n);\n\nCREATE TABLE journal_entries (\n    entry_id INTEGER PRIMARY KEY,\n    reference_no TEXT UNIQUE NOT NULL,\n    entry_date DATE NOT NULL,\n    description TEXT,\n    fiscal_year INTEGER NOT NULL,\n    is_posted BOOLEAN DEFAULT 0\n);\n\nCREATE TABLE entry_lines (\n    line_id INTEGER PRIMARY KEY,\n    entry_id INTEGER NOT NULL,\n    account_id INTEGER NOT NULL,\n    debit_amount DECIMAL(14,2) DEFAULT 0.00,\n    credit_amount DECIMAL(14,2) DEFAULT 0.00,\n    FOREIGN KEY (entry_id) REFERENCES journal_entries(entry_id),\n    FOREIGN KEY (account_id) REFERENCES accounts(account_id)\n);\nCREATE INDEX idx_journal_date ON journal_entries(entry_date, fiscal_year);\nCREATE INDEX idx_lines_account ON entry_lines(account_id);",
+    "sample_inserts": [
+      "INSERT INTO accounts VALUES (1, '1010', 'Operating Cash', 'asset', 'USD');",
+      "INSERT INTO accounts VALUES (2, '1200', 'Accounts Receivable', 'asset', 'USD');",
+      "INSERT INTO accounts VALUES (3, '2000', 'Accounts Payable', 'liability', 'USD');",
+      "INSERT INTO accounts VALUES (4, '4000', 'Subscription Revenue', 'revenue', 'USD');",
+      "INSERT INTO accounts VALUES (5, '5000', 'AWS Infrastructure Cost', 'expense', 'USD');",
+      "INSERT INTO journal_entries VALUES (1, 'JE-2024-001', '2024-01-31', 'January SaaS Billings', 2024, 1);",
+      "INSERT INTO journal_entries VALUES (2, 'JE-2024-002', '2024-02-15', 'Monthly AWS Invoice', 2024, 1);",
+      "INSERT INTO journal_entries VALUES (3, 'JE-2024-003', '2024-03-31', 'Q1 Revenue Recognition', 2024, 1);",
+      "INSERT INTO entry_lines VALUES (1, 1, 1, 50000.00, 0.00);",
+      "INSERT INTO entry_lines VALUES (2, 1, 4, 0.00, 50000.00);",
+      "INSERT INTO entry_lines VALUES (3, 2, 5, 12500.00, 0.00);",
+      "INSERT INTO entry_lines VALUES (4, 2, 3, 0.00, 12500.00);",
+      "INSERT INTO entry_lines VALUES (5, 3, 1, 85000.00, 0.00);",
+      "INSERT INTO entry_lines VALUES (6, 3, 4, 0.00, 85000.00);"
+    ]
+  }
+}

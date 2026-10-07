@@ -1,0 +1,611 @@
+[
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE head (age INTEGER)\n\nQuestion: How many heads of the departments are older than 56 ?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT COUNT(*) FROM head WHERE age > 56<|im_end|>",
+    "rejected": "SELECT * FROM (SELECT COUNT(*) FROM head WHERE age > 56) AS subquery_tbl<|im_end|>",
+    "category": "subquery_overhead",
+    "reason": "Wraps query in unnecessary derived subquery table overhead."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE head (name VARCHAR, born_state VARCHAR, age VARCHAR)\n\nQuestion: List the name, born state and age of the heads of departments ordered by age.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT name, born_state, age FROM head ORDER BY age<|im_end|>",
+    "rejected": "SELECT * FROM head ORDER BY age<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE department (creation VARCHAR, name VARCHAR, budget_in_billions VARCHAR)\n\nQuestion: List the creation year, name and budget of each department.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT creation, name, budget_in_billions FROM department<|im_end|>",
+    "rejected": "SELECT * FROM department<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE department (budget_in_billions INTEGER)\n\nQuestion: What are the maximum and minimum budget of the departments?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT MAX(budget_in_billions), MIN(budget_in_billions) FROM department<|im_end|>",
+    "rejected": "SELECT * FROM department<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE department (num_employees INTEGER, ranking INTEGER)\n\nQuestion: What is the average number of employees of the departments whose rank is between 10 and 15?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT AVG(num_employees) FROM department WHERE ranking BETWEEN 10 AND 15<|im_end|>",
+    "rejected": "SELECT * FROM department WHERE ranking BETWEEN 10 AND 15<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE head (name VARCHAR, born_state VARCHAR)\n\nQuestion: What are the names of the heads who are born outside the California state?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT name FROM head WHERE born_state <> 'California'<|im_end|>",
+    "rejected": "SELECT * FROM head WHERE born_state <> 'California'<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE department (creation VARCHAR, department_id VARCHAR); CREATE TABLE management (department_id VARCHAR, head_id VARCHAR); CREATE TABLE head (head_id VARCHAR, born_state VARCHAR)\n\nQuestion: What are the distinct creation years of the departments managed by a secretary born in state 'Alabama'?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT DISTINCT T1.creation FROM department AS T1 JOIN management AS T2 ON T1.department_id = T2.department_id JOIN head AS T3 ON T2.head_id = T3.head_id WHERE T3.born_state = 'Alabama'<|im_end|>",
+    "rejected": "SELECT DISTINCT T1.creation FROM department AS T1 JOIN management AS T2 ON T1.department_id = T2.department_id JOIN head AS T3 ON T2.head_id = T3.head_id WHERE T3.born_state = 'Alabama'<|im_end|>",
+    "category": "implicit_join_cartesian",
+    "reason": "Converts explicit JOIN to unindexed comma join."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE head (born_state VARCHAR)\n\nQuestion: What are the names of the states where at least 3 heads were born?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT born_state FROM head GROUP BY born_state HAVING COUNT(*) >= 3<|im_end|>",
+    "rejected": "SELECT * FROM head GROUP BY born_state HAVING COUNT(*) >= 3<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE department (creation VARCHAR)\n\nQuestion: In which year were most departments established?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT creation FROM department GROUP BY creation ORDER BY COUNT(*) DESC LIMIT 1<|im_end|>",
+    "rejected": "SELECT * FROM department GROUP BY creation ORDER BY COUNT(*) DESC LIMIT 1<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE management (department_id VARCHAR, temporary_acting VARCHAR); CREATE TABLE department (name VARCHAR, num_employees VARCHAR, department_id VARCHAR)\n\nQuestion: Show the name and number of employees for the departments managed by heads whose temporary acting value is 'Yes'?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT T1.name, T1.num_employees FROM department AS T1 JOIN management AS T2 ON T1.department_id = T2.department_id WHERE T2.temporary_acting = 'Yes'<|im_end|>",
+    "rejected": "SELECT T1.name, T1.num_employees FROM department AS T1 JOIN management AS T2 ON T1.department_id = T2.department_id WHERE T2.temporary_acting = 'Yes'<|im_end|>",
+    "category": "implicit_join_cartesian",
+    "reason": "Converts explicit JOIN to unindexed comma join."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE management (temporary_acting VARCHAR)\n\nQuestion: How many acting statuses are there?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT COUNT(DISTINCT temporary_acting) FROM management<|im_end|>",
+    "rejected": "SELECT * FROM management<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE management (department_id VARCHAR); CREATE TABLE department (department_id VARCHAR)\n\nQuestion: How many departments are led by heads who are not mentioned?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT COUNT(*) FROM department WHERE NOT department_id IN (SELECT department_id FROM management)<|im_end|>",
+    "rejected": "SELECT * FROM (SELECT COUNT(*) FROM department WHERE NOT department_id IN (SELECT department_id FROM management)) AS subquery_tbl<|im_end|>",
+    "category": "subquery_overhead",
+    "reason": "Wraps query in unnecessary derived subquery table overhead."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE head (age VARCHAR, head_id VARCHAR); CREATE TABLE management (head_id VARCHAR, temporary_acting VARCHAR)\n\nQuestion: What are the distinct ages of the heads who are acting?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT DISTINCT T1.age FROM management AS T2 JOIN head AS T1 ON T1.head_id = T2.head_id WHERE T2.temporary_acting = 'Yes'<|im_end|>",
+    "rejected": "SELECT DISTINCT T1.age FROM management AS T2 JOIN head AS T1 ON T1.head_id = T2.head_id WHERE T2.temporary_acting = 'Yes'<|im_end|>",
+    "category": "implicit_join_cartesian",
+    "reason": "Converts explicit JOIN to unindexed comma join."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE management (department_id VARCHAR, head_id VARCHAR); CREATE TABLE head (born_state VARCHAR, head_id VARCHAR); CREATE TABLE department (department_id VARCHAR, name VARCHAR)\n\nQuestion: List the states where both the secretary of 'Treasury' department and the secretary of 'Homeland Security' were born.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT T3.born_state FROM department AS T1 JOIN management AS T2 ON T1.department_id = T2.department_id JOIN head AS T3 ON T2.head_id = T3.head_id WHERE T1.name = 'Treasury' INTERSECT SELECT T3.born_state FROM department AS T1 JOIN management AS T2 ON T1.department_id = T2.department_id JOIN head AS T3 ON T2.head_id = T3.head_id WHERE T1.name = 'Homeland Security'<|im_end|>",
+    "rejected": "SELECT T3.born_state FROM department AS T1 JOIN management AS T2 ON T1.department_id = T2.department_id JOIN head AS T3 ON T2.head_id = T3.head_id WHERE T1.name = 'Treasury' INTERSECT SELECT T3.born_state FROM department AS T1 JOIN management AS T2 ON T1.department_id = T2.department_id JOIN head AS T3 ON T2.head_id = T3.head_id WHERE T1.name = 'Homeland Security'<|im_end|>",
+    "category": "implicit_join_cartesian",
+    "reason": "Converts explicit JOIN to unindexed comma join."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE management (department_id VARCHAR); CREATE TABLE department (department_id VARCHAR, name VARCHAR)\n\nQuestion: Which department has more than 1 head at a time? List the id, name and the number of heads.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT T1.department_id, T1.name, COUNT(*) FROM management AS T2 JOIN department AS T1 ON T1.department_id = T2.department_id GROUP BY T1.department_id HAVING COUNT(*) > 1<|im_end|>",
+    "rejected": "SELECT T1.department_id, T1.name, COUNT(*) FROM management AS T2 JOIN department AS T1 ON T1.department_id = T2.department_id GROUP BY T1.department_id HAVING COUNT(*) > 1<|im_end|>",
+    "category": "implicit_join_cartesian",
+    "reason": "Converts explicit JOIN to unindexed comma join."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE head (head_id VARCHAR, name VARCHAR)\n\nQuestion: Which head's name has the substring 'Ha'? List the id and name.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT head_id, name FROM head WHERE name LIKE '%Ha%'<|im_end|>",
+    "rejected": "SELECT * FROM head WHERE name LIKE '%Ha%'<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE farm (Id VARCHAR)\n\nQuestion: How many farms are there?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT COUNT(*) FROM farm<|im_end|>",
+    "rejected": "SELECT * FROM (SELECT COUNT(*) FROM farm) AS subquery_tbl<|im_end|>",
+    "category": "subquery_overhead",
+    "reason": "Wraps query in unnecessary derived subquery table overhead."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE farm (Total_Horses VARCHAR)\n\nQuestion: List the total number of horses on farms in ascending order.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT Total_Horses FROM farm ORDER BY Total_Horses<|im_end|>",
+    "rejected": "SELECT * FROM farm ORDER BY Total_Horses<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE farm_competition (Hosts VARCHAR, Theme VARCHAR)\n\nQuestion: What are the hosts of competitions whose theme is not \"Aliens\"?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT Hosts FROM farm_competition WHERE Theme <> 'Aliens'<|im_end|>",
+    "rejected": "SELECT * FROM farm_competition WHERE Theme <> 'Aliens'<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE farm_competition (Theme VARCHAR, YEAR VARCHAR)\n\nQuestion: What are the themes of farm competitions sorted by year in ascending order?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT Theme FROM farm_competition ORDER BY YEAR<|im_end|>",
+    "rejected": "SELECT * FROM farm_competition ORDER BY YEAR<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE farm (Working_Horses INTEGER, Total_Horses INTEGER)\n\nQuestion: What is the average number of working horses of farms with more than 5000 total number of horses?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT AVG(Working_Horses) FROM farm WHERE Total_Horses > 5000<|im_end|>",
+    "rejected": "SELECT * FROM farm WHERE Total_Horses > 5000<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE farm (Cows INTEGER)\n\nQuestion: What are the maximum and minimum number of cows across all farms.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT MAX(Cows), MIN(Cows) FROM farm<|im_end|>",
+    "rejected": "SELECT * FROM farm<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE city (Status VARCHAR)\n\nQuestion: How many different statuses do cities have?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT COUNT(DISTINCT Status) FROM city<|im_end|>",
+    "rejected": "SELECT * FROM city<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE city (Official_Name VARCHAR, Population VARCHAR)\n\nQuestion: List official names of cities in descending order of population.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT Official_Name FROM city ORDER BY Population DESC<|im_end|>",
+    "rejected": "SELECT * FROM city ORDER BY Population DESC<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE city (Official_Name VARCHAR, Status VARCHAR, Population VARCHAR)\n\nQuestion: List the official name and status of the city with the largest population.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT Official_Name, Status FROM city ORDER BY Population DESC LIMIT 1<|im_end|>",
+    "rejected": "SELECT * FROM city ORDER BY Population DESC LIMIT 1<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE city (Official_Name VARCHAR, City_ID VARCHAR); CREATE TABLE farm_competition (Year VARCHAR, Host_city_ID VARCHAR)\n\nQuestion: Show the years and the official names of the host cities of competitions.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT T2.Year, T1.Official_Name FROM city AS T1 JOIN farm_competition AS T2 ON T1.City_ID = T2.Host_city_ID<|im_end|>",
+    "rejected": "SELECT T2.Year, T1.Official_Name FROM city AS T1 JOIN farm_competition AS T2 ON T1.City_ID = T2.Host_city_ID<|im_end|>",
+    "category": "implicit_join_cartesian",
+    "reason": "Converts explicit JOIN to unindexed comma join."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE farm_competition (Host_city_ID VARCHAR); CREATE TABLE city (Official_Name VARCHAR, City_ID VARCHAR)\n\nQuestion: Show the official names of the cities that have hosted more than one competition.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT T1.Official_Name FROM city AS T1 JOIN farm_competition AS T2 ON T1.City_ID = T2.Host_city_ID GROUP BY T2.Host_city_ID HAVING COUNT(*) > 1<|im_end|>",
+    "rejected": "SELECT T1.Official_Name FROM city AS T1 JOIN farm_competition AS T2 ON T1.City_ID = T2.Host_city_ID GROUP BY T2.Host_city_ID HAVING COUNT(*) > 1<|im_end|>",
+    "category": "implicit_join_cartesian",
+    "reason": "Converts explicit JOIN to unindexed comma join."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE city (Status VARCHAR, City_ID VARCHAR); CREATE TABLE farm_competition (Host_city_ID VARCHAR)\n\nQuestion: Show the status of the city that has hosted the greatest number of competitions.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT T1.Status FROM city AS T1 JOIN farm_competition AS T2 ON T1.City_ID = T2.Host_city_ID GROUP BY T2.Host_city_ID ORDER BY COUNT(*) DESC LIMIT 1<|im_end|>",
+    "rejected": "SELECT T1.Status FROM city AS T1 JOIN farm_competition AS T2 ON T1.City_ID = T2.Host_city_ID GROUP BY T2.Host_city_ID ORDER BY COUNT(*) DESC LIMIT 1<|im_end|>",
+    "category": "implicit_join_cartesian",
+    "reason": "Converts explicit JOIN to unindexed comma join."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE city (City_ID VARCHAR, Population INTEGER); CREATE TABLE farm_competition (Theme VARCHAR, Host_city_ID VARCHAR)\n\nQuestion: Please show the themes of competitions with host cities having populations larger than 1000.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT T2.Theme FROM city AS T1 JOIN farm_competition AS T2 ON T1.City_ID = T2.Host_city_ID WHERE T1.Population > 1000<|im_end|>",
+    "rejected": "SELECT T2.Theme FROM city AS T1 JOIN farm_competition AS T2 ON T1.City_ID = T2.Host_city_ID WHERE T1.Population > 1000<|im_end|>",
+    "category": "implicit_join_cartesian",
+    "reason": "Converts explicit JOIN to unindexed comma join."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE city (Status VARCHAR, Population INTEGER)\n\nQuestion: Please show the different statuses of cities and the average population of cities with each status.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT Status, AVG(Population) FROM city GROUP BY Status<|im_end|>",
+    "rejected": "SELECT * FROM city GROUP BY Status<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE city (Status VARCHAR)\n\nQuestion: Please show the different statuses, ordered by the number of cities that have each.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT Status FROM city GROUP BY Status ORDER BY COUNT(*)<|im_end|>",
+    "rejected": "SELECT * FROM city GROUP BY Status ORDER BY COUNT(*)<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE city (Status VARCHAR)\n\nQuestion: List the most common type of Status across cities.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT Status FROM city GROUP BY Status ORDER BY COUNT(*) DESC LIMIT 1<|im_end|>",
+    "rejected": "SELECT * FROM city GROUP BY Status ORDER BY COUNT(*) DESC LIMIT 1<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE farm_competition (Official_Name VARCHAR, City_ID VARCHAR, Host_city_ID VARCHAR); CREATE TABLE city (Official_Name VARCHAR, City_ID VARCHAR, Host_city_ID VARCHAR)\n\nQuestion: List the official names of cities that have not held any competition.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT Official_Name FROM city WHERE NOT City_ID IN (SELECT Host_city_ID FROM farm_competition)<|im_end|>",
+    "rejected": "SELECT * FROM city WHERE NOT City_ID IN (SELECT Host_city_ID FROM farm_competition)<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE city (Status VARCHAR, Population INTEGER)\n\nQuestion: Show the status shared by cities with population bigger than 1500 and smaller than 500.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT Status FROM city WHERE Population > 1500 INTERSECT SELECT Status FROM city WHERE Population < 500<|im_end|>",
+    "rejected": "SELECT * FROM city WHERE Population > 1500 INTERSECT SELECT Status FROM city WHERE Population < 500<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE city (Official_Name VARCHAR, Population VARCHAR)\n\nQuestion: Find the official names of cities with population bigger than 1500 or smaller than 500.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT Official_Name FROM city WHERE Population > 1500 OR Population < 500<|im_end|>",
+    "rejected": "SELECT * FROM city WHERE Population > 1500 OR Population < 500<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE city (Census_Ranking VARCHAR, Status VARCHAR)\n\nQuestion: Show the census ranking of cities whose status are not \"Village\".\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT Census_Ranking FROM city WHERE Status <> \"Village\"<|im_end|>",
+    "rejected": "SELECT * FROM city WHERE Status <> \"Village\"<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE courses (course_name VARCHAR, course_id VARCHAR); CREATE TABLE student_course_registrations (course_Id VARCHAR)\n\nQuestion: which course has most number of registered students?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT T1.course_name FROM courses AS T1 JOIN student_course_registrations AS T2 ON T1.course_id = T2.course_Id GROUP BY T1.course_id ORDER BY COUNT(*) DESC LIMIT 1<|im_end|>",
+    "rejected": "SELECT T1.course_name FROM courses AS T1 JOIN student_course_registrations AS T2 ON T1.course_id = T2.course_Id GROUP BY T1.course_id ORDER BY COUNT(*) DESC LIMIT 1<|im_end|>",
+    "category": "implicit_join_cartesian",
+    "reason": "Converts explicit JOIN to unindexed comma join."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE student_course_registrations (student_id VARCHAR)\n\nQuestion: what is id of students who registered some courses but the least number of courses in these students?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT student_id FROM student_course_registrations GROUP BY student_id ORDER BY COUNT(*) LIMIT 1<|im_end|>",
+    "rejected": "SELECT * FROM student_course_registrations GROUP BY student_id ORDER BY COUNT(*) LIMIT 1<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE candidates (candidate_id VARCHAR); CREATE TABLE people (first_name VARCHAR, last_name VARCHAR, person_id VARCHAR)\n\nQuestion: what are the first name and last name of all candidates?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT T2.first_name, T2.last_name FROM candidates AS T1 JOIN people AS T2 ON T1.candidate_id = T2.person_id<|im_end|>",
+    "rejected": "SELECT T2.first_name, T2.last_name FROM candidates AS T1 JOIN people AS T2 ON T1.candidate_id = T2.person_id<|im_end|>",
+    "category": "implicit_join_cartesian",
+    "reason": "Converts explicit JOIN to unindexed comma join."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE student_course_attendance (student_id VARCHAR); CREATE TABLE students (student_id VARCHAR)\n\nQuestion: List the id of students who never attends courses?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT student_id FROM students WHERE NOT student_id IN (SELECT student_id FROM student_course_attendance)<|im_end|>",
+    "rejected": "SELECT * FROM students WHERE NOT student_id IN (SELECT student_id FROM student_course_attendance)<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE student_course_attendance (student_id VARCHAR)\n\nQuestion: List the id of students who attended some courses?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT student_id FROM student_course_attendance<|im_end|>",
+    "rejected": "SELECT * FROM student_course_attendance<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE courses (course_name VARCHAR, course_id VARCHAR); CREATE TABLE student_course_registrations (student_id VARCHAR, course_id VARCHAR)\n\nQuestion: What are the ids of all students for courses and what are the names of those courses?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT T1.student_id, T2.course_name FROM student_course_registrations AS T1 JOIN courses AS T2 ON T1.course_id = T2.course_id<|im_end|>",
+    "rejected": "SELECT T1.student_id, T2.course_name FROM student_course_registrations AS T1 JOIN courses AS T2 ON T1.course_id = T2.course_id<|im_end|>",
+    "category": "implicit_join_cartesian",
+    "reason": "Converts explicit JOIN to unindexed comma join."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE student_course_registrations (student_id VARCHAR, registration_date VARCHAR); CREATE TABLE students (student_details VARCHAR, student_id VARCHAR)\n\nQuestion: What is detail of the student who most recently registered course?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT T2.student_details FROM student_course_registrations AS T1 JOIN students AS T2 ON T1.student_id = T2.student_id ORDER BY T1.registration_date DESC LIMIT 1<|im_end|>",
+    "rejected": "SELECT T2.student_details FROM student_course_registrations AS T1 JOIN students AS T2 ON T1.student_id = T2.student_id ORDER BY T1.registration_date DESC LIMIT 1<|im_end|>",
+    "category": "implicit_join_cartesian",
+    "reason": "Converts explicit JOIN to unindexed comma join."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE student_course_attendance (course_id VARCHAR); CREATE TABLE courses (course_id VARCHAR, course_name VARCHAR)\n\nQuestion: How many students attend course English?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT COUNT(*) FROM courses AS T1 JOIN student_course_attendance AS T2 ON T1.course_id = T2.course_id WHERE T1.course_name = \"English\"<|im_end|>",
+    "rejected": "SELECT COUNT(*) FROM courses AS T1 JOIN student_course_attendance AS T2 ON T1.course_id = T2.course_id WHERE T1.course_name = \"English\"<|im_end|>",
+    "category": "implicit_join_cartesian",
+    "reason": "Converts explicit JOIN to unindexed comma join."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE courses (course_id VARCHAR); CREATE TABLE student_course_attendance (course_id VARCHAR, student_id VARCHAR)\n\nQuestion: How many courses do the student whose id is 171 attend?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT COUNT(*) FROM courses AS T1 JOIN student_course_attendance AS T2 ON T1.course_id = T2.course_id WHERE T2.student_id = 171<|im_end|>",
+    "rejected": "SELECT COUNT(*) FROM courses AS T1 JOIN student_course_attendance AS T2 ON T1.course_id = T2.course_id WHERE T2.student_id = 171<|im_end|>",
+    "category": "implicit_join_cartesian",
+    "reason": "Converts explicit JOIN to unindexed comma join."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE candidates (candidate_id VARCHAR); CREATE TABLE people (person_id VARCHAR, email_address VARCHAR)\n\nQuestion: Find id of the candidate whose email is stanley.monahan@example.org?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT T2.candidate_id FROM people AS T1 JOIN candidates AS T2 ON T1.person_id = T2.candidate_id WHERE T1.email_address = \"stanley.monahan@example.org\"<|im_end|>",
+    "rejected": "SELECT T2.candidate_id FROM people AS T1 JOIN candidates AS T2 ON T1.person_id = T2.candidate_id WHERE T1.email_address = \"stanley.monahan@example.org\"<|im_end|>",
+    "category": "implicit_join_cartesian",
+    "reason": "Converts explicit JOIN to unindexed comma join."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE candidate_assessments (candidate_id VARCHAR, assessment_date VARCHAR)\n\nQuestion: Find id of the candidate who most recently accessed the course?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT candidate_id FROM candidate_assessments ORDER BY assessment_date DESC LIMIT 1<|im_end|>",
+    "rejected": "SELECT * FROM candidate_assessments ORDER BY assessment_date DESC LIMIT 1<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE students (student_details VARCHAR, student_id VARCHAR); CREATE TABLE student_course_registrations (student_id VARCHAR)\n\nQuestion: What is detail of the student who registered the most number of courses?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT T1.student_details FROM students AS T1 JOIN student_course_registrations AS T2 ON T1.student_id = T2.student_id GROUP BY T1.student_id ORDER BY COUNT(*) DESC LIMIT 1<|im_end|>",
+    "rejected": "SELECT T1.student_details FROM students AS T1 JOIN student_course_registrations AS T2 ON T1.student_id = T2.student_id GROUP BY T1.student_id ORDER BY COUNT(*) DESC LIMIT 1<|im_end|>",
+    "category": "implicit_join_cartesian",
+    "reason": "Converts explicit JOIN to unindexed comma join."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE students (student_id VARCHAR); CREATE TABLE student_course_registrations (student_id VARCHAR)\n\nQuestion: List the id of students who registered some courses and the number of their registered courses?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT T1.student_id, COUNT(*) FROM students AS T1 JOIN student_course_registrations AS T2 ON T1.student_id = T2.student_id GROUP BY T1.student_id<|im_end|>",
+    "rejected": "SELECT T1.student_id, COUNT(*) FROM students AS T1 JOIN student_course_registrations AS T2 ON T1.student_id = T2.student_id GROUP BY T1.student_id<|im_end|>",
+    "category": "implicit_join_cartesian",
+    "reason": "Converts explicit JOIN to unindexed comma join."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE students (student_id VARCHAR); CREATE TABLE courses (course_name VARCHAR, course_id VARCHAR); CREATE TABLE student_course_registrations (course_id VARCHAR, student_id VARCHAR)\n\nQuestion: How many registed students do each course have? List course name and the number of their registered students?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT T3.course_name, COUNT(*) FROM students AS T1 JOIN student_course_registrations AS T2 ON T1.student_id = T2.student_id JOIN courses AS T3 ON T2.course_id = T3.course_id GROUP BY T2.course_id<|im_end|>",
+    "rejected": "SELECT T3.course_name, COUNT(*) FROM students AS T1 JOIN student_course_registrations AS T2 ON T1.student_id = T2.student_id JOIN courses AS T3 ON T2.course_id = T3.course_id GROUP BY T2.course_id<|im_end|>",
+    "category": "implicit_join_cartesian",
+    "reason": "Converts explicit JOIN to unindexed comma join."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE candidate_assessments (candidate_id VARCHAR, asessment_outcome_code VARCHAR)\n\nQuestion: Find id of candidates whose assessment code is \"Pass\"?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT candidate_id FROM candidate_assessments WHERE asessment_outcome_code = \"Pass\"<|im_end|>",
+    "rejected": "SELECT * FROM candidate_assessments WHERE asessment_outcome_code = \"Pass\"<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE candidates (candidate_id VARCHAR); CREATE TABLE people (cell_mobile_number VARCHAR, person_id VARCHAR); CREATE TABLE candidate_assessments (candidate_id VARCHAR, asessment_outcome_code VARCHAR)\n\nQuestion: Find the cell mobile number of the candidates whose assessment code is \"Fail\"?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT T3.cell_mobile_number FROM candidates AS T1 JOIN candidate_assessments AS T2 ON T1.candidate_id = T2.candidate_id JOIN people AS T3 ON T1.candidate_id = T3.person_id WHERE T2.asessment_outcome_code = \"Fail\"<|im_end|>",
+    "rejected": "SELECT T3.cell_mobile_number FROM candidates AS T1 JOIN candidate_assessments AS T2 ON T1.candidate_id = T2.candidate_id JOIN people AS T3 ON T1.candidate_id = T3.person_id WHERE T2.asessment_outcome_code = \"Fail\"<|im_end|>",
+    "category": "implicit_join_cartesian",
+    "reason": "Converts explicit JOIN to unindexed comma join."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE student_course_attendance (student_id VARCHAR, course_id VARCHAR)\n\nQuestion: What are the id of students who registered course 301?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT student_id FROM student_course_attendance WHERE course_id = 301<|im_end|>",
+    "rejected": "SELECT * FROM student_course_attendance WHERE course_id = 301<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE student_course_attendance (student_id VARCHAR, course_id VARCHAR, date_of_attendance VARCHAR)\n\nQuestion: What is the id of the student who most recently registered course 301?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT student_id FROM student_course_attendance WHERE course_id = 301 ORDER BY date_of_attendance DESC LIMIT 1<|im_end|>",
+    "rejected": "SELECT * FROM student_course_attendance WHERE course_id = 301 ORDER BY date_of_attendance DESC LIMIT 1<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE addresses (city VARCHAR, address_id VARCHAR); CREATE TABLE people_addresses (address_id VARCHAR)\n\nQuestion: Find distinct cities of addresses of people?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT DISTINCT T1.city FROM addresses AS T1 JOIN people_addresses AS T2 ON T1.address_id = T2.address_id<|im_end|>",
+    "rejected": "SELECT DISTINCT T1.city FROM addresses AS T1 JOIN people_addresses AS T2 ON T1.address_id = T2.address_id<|im_end|>",
+    "category": "implicit_join_cartesian",
+    "reason": "Converts explicit JOIN to unindexed comma join."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE students (student_id VARCHAR); CREATE TABLE addresses (city VARCHAR, address_id VARCHAR); CREATE TABLE people_addresses (address_id VARCHAR, person_id VARCHAR)\n\nQuestion: Find distinct cities of address of students?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT DISTINCT T1.city FROM addresses AS T1 JOIN people_addresses AS T2 ON T1.address_id = T2.address_id JOIN students AS T3 ON T2.person_id = T3.student_id<|im_end|>",
+    "rejected": "SELECT DISTINCT T1.city FROM addresses AS T1 JOIN people_addresses AS T2 ON T1.address_id = T2.address_id JOIN students AS T3 ON T2.person_id = T3.student_id<|im_end|>",
+    "category": "implicit_join_cartesian",
+    "reason": "Converts explicit JOIN to unindexed comma join."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE courses (course_name VARCHAR)\n\nQuestion: List the names of courses in alphabetical order?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT course_name FROM courses ORDER BY course_name<|im_end|>",
+    "rejected": "SELECT * FROM courses ORDER BY course_name<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE people (first_name VARCHAR)\n\nQuestion: List the first names of people in alphabetical order?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT first_name FROM people ORDER BY first_name<|im_end|>",
+    "rejected": "SELECT * FROM people ORDER BY first_name<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE student_course_attendance (student_id VARCHAR); CREATE TABLE student_course_registrations (student_id VARCHAR)\n\nQuestion: What are the id of students who registered courses or attended courses?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT student_id FROM student_course_registrations UNION SELECT student_id FROM student_course_attendance<|im_end|>",
+    "rejected": "SELECT * FROM student_course_registrations UNION SELECT student_id FROM student_course_attendance<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE student_course_attendance (course_id VARCHAR, student_id VARCHAR); CREATE TABLE student_course_registrations (course_id VARCHAR, student_id VARCHAR)\n\nQuestion: Find the id of courses which are registered or attended by student whose id is 121?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT course_id FROM student_course_registrations WHERE student_id = 121 UNION SELECT course_id FROM student_course_attendance WHERE student_id = 121<|im_end|>",
+    "rejected": "SELECT * FROM student_course_registrations WHERE student_id = 121 UNION SELECT course_id FROM student_course_attendance WHERE student_id = 121<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE student_course_attendance (student_id VARCHAR); CREATE TABLE student_course_registrations (student_id VARCHAR)\n\nQuestion: What are all info of students who registered courses but not attended courses?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT * FROM student_course_registrations WHERE NOT student_id IN (SELECT student_id FROM student_course_attendance)<|im_end|>",
+    "rejected": "SELECT * FROM (SELECT * FROM student_course_registrations WHERE NOT student_id IN (SELECT student_id FROM student_course_attendance)) AS subquery_tbl<|im_end|>",
+    "category": "subquery_overhead",
+    "reason": "Wraps query in unnecessary derived subquery table overhead."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE student_course_registrations (student_id VARCHAR, course_id VARCHAR, registration_date VARCHAR); CREATE TABLE courses (course_id VARCHAR, course_name VARCHAR)\n\nQuestion: List the id of students who registered course statistics in the order of registration date.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT T2.student_id FROM courses AS T1 JOIN student_course_registrations AS T2 ON T1.course_id = T2.course_id WHERE T1.course_name = \"statistics\" ORDER BY T2.registration_date<|im_end|>",
+    "rejected": "SELECT T2.student_id FROM courses AS T1 JOIN student_course_registrations AS T2 ON T1.course_id = T2.course_id WHERE T1.course_name = \"statistics\" ORDER BY T2.registration_date<|im_end|>",
+    "category": "implicit_join_cartesian",
+    "reason": "Converts explicit JOIN to unindexed comma join."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE student_course_attendance (student_id VARCHAR, course_id VARCHAR, date_of_attendance VARCHAR); CREATE TABLE courses (course_id VARCHAR, course_name VARCHAR)\n\nQuestion: List the id of students who attended  statistics courses in the order of attendance date.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT T2.student_id FROM courses AS T1 JOIN student_course_attendance AS T2 ON T1.course_id = T2.course_id WHERE T1.course_name = \"statistics\" ORDER BY T2.date_of_attendance<|im_end|>",
+    "rejected": "SELECT T2.student_id FROM courses AS T1 JOIN student_course_attendance AS T2 ON T1.course_id = T2.course_id WHERE T1.course_name = \"statistics\" ORDER BY T2.date_of_attendance<|im_end|>",
+    "category": "implicit_join_cartesian",
+    "reason": "Converts explicit JOIN to unindexed comma join."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE weather (date VARCHAR, max_temperature_f INTEGER)\n\nQuestion: Give me the dates when the max temperature was higher than 85.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT date FROM weather WHERE max_temperature_f > 85<|im_end|>",
+    "rejected": "SELECT * FROM weather WHERE max_temperature_f > 85<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE station (name VARCHAR, lat INTEGER)\n\nQuestion: What are the names of stations that have latitude lower than 37.5?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT name FROM station WHERE lat < 37.5<|im_end|>",
+    "rejected": "SELECT * FROM station WHERE lat < 37.5<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE station (city VARCHAR, lat INTEGER)\n\nQuestion: For each city, return the highest latitude among its stations.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT city, MAX(lat) FROM station GROUP BY city<|im_end|>",
+    "rejected": "SELECT * FROM station GROUP BY city<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE trip (start_station_name VARCHAR, end_station_name VARCHAR, id VARCHAR)\n\nQuestion: Give me the start station and end station for the trips with the three oldest id.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT start_station_name, end_station_name FROM trip ORDER BY id LIMIT 3<|im_end|>",
+    "rejected": "SELECT * FROM trip ORDER BY id LIMIT 3<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE station (lat INTEGER, long INTEGER, city VARCHAR)\n\nQuestion: What is the average latitude and longitude of stations located in San Jose city?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT AVG(lat), AVG(long) FROM station WHERE city = \"San Jose\"<|im_end|>",
+    "rejected": "SELECT * FROM station WHERE city = \"San Jose\"<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE trip (id VARCHAR, duration VARCHAR)\n\nQuestion: What is the id of the trip that has the shortest duration?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT id FROM trip ORDER BY duration LIMIT 1<|im_end|>",
+    "rejected": "SELECT * FROM trip ORDER BY duration LIMIT 1<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE trip (duration INTEGER, bike_id VARCHAR)\n\nQuestion: What is the total and maximum duration of trips with bike id 636?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT SUM(duration), MAX(duration) FROM trip WHERE bike_id = 636<|im_end|>",
+    "rejected": "SELECT * FROM trip WHERE bike_id = 636<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE weather (zip_code VARCHAR, mean_temperature_f INTEGER, date VARCHAR)\n\nQuestion: For each zip code, return the average mean temperature of August there.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT zip_code, AVG(mean_temperature_f) FROM weather WHERE date LIKE \"8/%\" GROUP BY zip_code<|im_end|>",
+    "rejected": "SELECT * FROM weather WHERE date LIKE \"8/%\" GROUP BY zip_code<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE trip (bike_id VARCHAR)\n\nQuestion: From the trip record, find the number of unique bikes.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT COUNT(DISTINCT bike_id) FROM trip<|im_end|>",
+    "rejected": "SELECT * FROM trip<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE station (city VARCHAR)\n\nQuestion: What is the number of distinct cities the stations are located at?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT COUNT(DISTINCT city) FROM station<|im_end|>",
+    "rejected": "SELECT * FROM station<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE station (city VARCHAR)\n\nQuestion: How many stations does Mountain View city has?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT COUNT(*) FROM station WHERE city = \"Mountain View\"<|im_end|>",
+    "rejected": "SELECT * FROM (SELECT COUNT(*) FROM station WHERE city = \"Mountain View\") AS subquery_tbl<|im_end|>",
+    "category": "subquery_overhead",
+    "reason": "Wraps query in unnecessary derived subquery table overhead."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE station (name VARCHAR, id VARCHAR); CREATE TABLE status (station_id VARCHAR, bikes_available VARCHAR)\n\nQuestion: Return the unique name for stations that have ever had 7 bikes available.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT DISTINCT T1.name FROM station AS T1 JOIN status AS T2 ON T1.id = T2.station_id WHERE T2.bikes_available = 7<|im_end|>",
+    "rejected": "SELECT DISTINCT T1.name FROM station AS T1 JOIN status AS T2 ON T1.id = T2.station_id WHERE T2.bikes_available = 7<|im_end|>",
+    "category": "implicit_join_cartesian",
+    "reason": "Converts explicit JOIN to unindexed comma join."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE trip (start_station_name VARCHAR, start_station_id VARCHAR, start_date VARCHAR)\n\nQuestion: Which start station had the most trips starting from August? Give me the name and id of the station.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT start_station_name, start_station_id FROM trip WHERE start_date LIKE \"8/%\" GROUP BY start_station_name ORDER BY COUNT(*) DESC LIMIT 1<|im_end|>",
+    "rejected": "SELECT * FROM trip WHERE start_date LIKE \"8/%\" GROUP BY start_station_name ORDER BY COUNT(*) DESC LIMIT 1<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE trip (bike_id VARCHAR, zip_code VARCHAR)\n\nQuestion: Which bike traveled the most often in zip code 94002?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT bike_id FROM trip WHERE zip_code = 94002 GROUP BY bike_id ORDER BY COUNT(*) DESC LIMIT 1<|im_end|>",
+    "rejected": "SELECT * FROM trip WHERE zip_code = 94002 GROUP BY bike_id ORDER BY COUNT(*) DESC LIMIT 1<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE weather (mean_humidity VARCHAR, mean_visibility_miles VARCHAR)\n\nQuestion: How many days had both mean humidity above 50 and mean visibility above 8?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT COUNT(*) FROM weather WHERE mean_humidity > 50 AND mean_visibility_miles > 8<|im_end|>",
+    "rejected": "SELECT * FROM (SELECT COUNT(*) FROM weather WHERE mean_humidity > 50 AND mean_visibility_miles > 8) AS subquery_tbl<|im_end|>",
+    "category": "subquery_overhead",
+    "reason": "Wraps query in unnecessary derived subquery table overhead."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE trip (start_station_id VARCHAR, duration VARCHAR); CREATE TABLE station (lat VARCHAR, long VARCHAR, city VARCHAR, id VARCHAR)\n\nQuestion: What is the latitude, longitude, city of the station from which the shortest trip started?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT T1.lat, T1.long, T1.city FROM station AS T1 JOIN trip AS T2 ON T1.id = T2.start_station_id ORDER BY T2.duration LIMIT 1<|im_end|>",
+    "rejected": "SELECT T1.lat, T1.long, T1.city FROM station AS T1 JOIN trip AS T2 ON T1.id = T2.start_station_id ORDER BY T2.duration LIMIT 1<|im_end|>",
+    "category": "implicit_join_cartesian",
+    "reason": "Converts explicit JOIN to unindexed comma join."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE status (id VARCHAR, station_id VARCHAR, city VARCHAR, bikes_available INTEGER); CREATE TABLE station (id VARCHAR, station_id VARCHAR, city VARCHAR, bikes_available INTEGER)\n\nQuestion: What are the ids of stations that are located in San Francisco and have average bike availability above 10.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT id FROM station WHERE city = \"San Francisco\" INTERSECT SELECT station_id FROM status GROUP BY station_id HAVING AVG(bikes_available) > 10<|im_end|>",
+    "rejected": "SELECT * FROM station WHERE city = \"San Francisco\" INTERSECT SELECT station_id FROM status GROUP BY station_id HAVING AVG(bikes_available) > 10<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE station (name VARCHAR, id VARCHAR); CREATE TABLE station (name VARCHAR, id VARCHAR, installation_date VARCHAR); CREATE TABLE status (station_id VARCHAR, bikes_available INTEGER)\n\nQuestion: What are the names and ids of stations that had more than 14 bikes available on average or were installed in December?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT T1.name, T1.id FROM station AS T1 JOIN status AS T2 ON T1.id = T2.station_id GROUP BY T2.station_id HAVING AVG(T2.bikes_available) > 14 UNION SELECT name, id FROM station WHERE installation_date LIKE \"12/%\"<|im_end|>",
+    "rejected": "SELECT T1.name, T1.id FROM station AS T1 JOIN status AS T2 ON T1.id = T2.station_id GROUP BY T2.station_id HAVING AVG(T2.bikes_available) > 14 UNION SELECT name, id FROM station WHERE installation_date LIKE \"12/%\"<|im_end|>",
+    "category": "implicit_join_cartesian",
+    "reason": "Converts explicit JOIN to unindexed comma join."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE weather (cloud_cover VARCHAR, zip_code VARCHAR)\n\nQuestion: What is the 3 most common cloud cover rates in the region of zip code 94107?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT cloud_cover FROM weather WHERE zip_code = 94107 GROUP BY cloud_cover ORDER BY COUNT(*) DESC LIMIT 3<|im_end|>",
+    "rejected": "SELECT * FROM weather WHERE zip_code = 94107 GROUP BY cloud_cover ORDER BY COUNT(*) DESC LIMIT 3<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE weather (zip_code VARCHAR, mean_sea_level_pressure_inches INTEGER)\n\nQuestion: What is the zip code in which the average mean sea level pressure is the lowest?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT zip_code FROM weather GROUP BY zip_code ORDER BY AVG(mean_sea_level_pressure_inches) LIMIT 1<|im_end|>",
+    "rejected": "SELECT * FROM weather GROUP BY zip_code ORDER BY AVG(mean_sea_level_pressure_inches) LIMIT 1<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE status (bikes_available INTEGER, station_id VARCHAR, id VARCHAR, city VARCHAR); CREATE TABLE station (bikes_available INTEGER, station_id VARCHAR, id VARCHAR, city VARCHAR)\n\nQuestion: What is the average bike availability in stations that are not located in Palo Alto?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT AVG(bikes_available) FROM status WHERE NOT station_id IN (SELECT id FROM station WHERE city = \"Palo Alto\")<|im_end|>",
+    "rejected": "SELECT * FROM status WHERE NOT station_id IN (SELECT id FROM station WHERE city = \"Palo Alto\")<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE station (long INTEGER, id VARCHAR, station_id VARCHAR, bikes_available INTEGER); CREATE TABLE status (long INTEGER, id VARCHAR, station_id VARCHAR, bikes_available INTEGER)\n\nQuestion: What is the average longitude of stations that never had bike availability more than 10?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT AVG(long) FROM station WHERE NOT id IN (SELECT station_id FROM status GROUP BY station_id HAVING MAX(bikes_available) > 10)<|im_end|>",
+    "rejected": "SELECT * FROM station WHERE NOT id IN (SELECT station_id FROM status GROUP BY station_id HAVING MAX(bikes_available) > 10)<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE weather (date VARCHAR, zip_code VARCHAR, max_temperature_f VARCHAR)\n\nQuestion: When and in what zip code did max temperature reach 80?\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT date, zip_code FROM weather WHERE max_temperature_f >= 80<|im_end|>",
+    "rejected": "SELECT * FROM weather WHERE max_temperature_f >= 80<|im_end|>",
+    "category": "unindexed_wildcard_projection",
+    "reason": "Replaces selective indexed column projection with SELECT *."
+  },
+  {
+    "prompt": "<|im_start|>system\nYou are an expert enterprise SQL engineer. Given a database schema DDL and a user request, produce a single, production-ready, highly optimized SQL query. Adhere strictly to indexing and sargability rules, match the target dialect, and refuse destructive operations with a safe explanatory message.<|im_end|>\n<|im_start|>user\nDatabase Dialect: SQLite\n\nSchema DDL:\nCREATE TABLE trip (id VARCHAR, zip_code VARCHAR); CREATE TABLE weather (zip_code VARCHAR, mean_temperature_f INTEGER)\n\nQuestion: Give me ids for all the trip that took place in a zip code area with average mean temperature above 60.\n<|im_end|>\n<|im_start|>assistant\n",
+    "chosen": "SELECT T1.id FROM trip AS T1 JOIN weather AS T2 ON T1.zip_code = T2.zip_code GROUP BY T2.zip_code HAVING AVG(T2.mean_temperature_f) > 60<|im_end|>",
+    "rejected": "SELECT T1.id FROM trip AS T1 JOIN weather AS T2 ON T1.zip_code = T2.zip_code GROUP BY T2.zip_code HAVING AVG(T2.mean_temperature_f) > 60<|im_end|>",
+    "category": "implicit_join_cartesian",
+    "reason": "Converts explicit JOIN to unindexed comma join."
+  }
+]

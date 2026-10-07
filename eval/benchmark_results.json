@@ -1,0 +1,1234 @@
+{
+  "aligned_dpo_metrics": {
+    "execution_accuracy_pct": 98.9,
+    "full_table_scan_rate_pct": 98.9,
+    "safe_refusal_rate_pct": 0.0,
+    "total_evaluated": 87
+  },
+  "anti_pattern_base_metrics": {
+    "execution_accuracy_pct": 95.4,
+    "full_table_scan_rate_pct": 95.4,
+    "safe_refusal_rate_pct": 0.0,
+    "total_evaluated": 87
+  },
+  "detailed_test_runs": [
+    {
+      "test_id": 1,
+      "category": "subquery_overhead",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.039
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.018
+      }
+    },
+    {
+      "test_id": 2,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.023
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.01
+      }
+    },
+    {
+      "test_id": 3,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.01
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.007
+      }
+    },
+    {
+      "test_id": 4,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.014
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.007
+      }
+    },
+    {
+      "test_id": 5,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.015
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.009
+      }
+    },
+    {
+      "test_id": 6,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.009
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.008
+      }
+    },
+    {
+      "test_id": 7,
+      "category": "implicit_join_cartesian",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.039
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.008
+      }
+    },
+    {
+      "test_id": 8,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.016
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.01
+      }
+    },
+    {
+      "test_id": 9,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.021
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.014
+      }
+    },
+    {
+      "test_id": 10,
+      "category": "implicit_join_cartesian",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.018
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.004
+      }
+    },
+    {
+      "test_id": 11,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.019
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.007
+      }
+    },
+    {
+      "test_id": 12,
+      "category": "subquery_overhead",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.025
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.016
+      }
+    },
+    {
+      "test_id": 13,
+      "category": "implicit_join_cartesian",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.024
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.007
+      }
+    },
+    {
+      "test_id": 14,
+      "category": "implicit_join_cartesian",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.083
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.017
+      }
+    },
+    {
+      "test_id": 15,
+      "category": "implicit_join_cartesian",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.025
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.005
+      }
+    },
+    {
+      "test_id": 16,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.013
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.008
+      }
+    },
+    {
+      "test_id": 17,
+      "category": "subquery_overhead",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.01
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.011
+      }
+    },
+    {
+      "test_id": 18,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.011
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.008
+      }
+    },
+    {
+      "test_id": 19,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.01
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.007
+      }
+    },
+    {
+      "test_id": 20,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.011
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.008
+      }
+    },
+    {
+      "test_id": 21,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.013
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.008
+      }
+    },
+    {
+      "test_id": 22,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.013
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.007
+      }
+    },
+    {
+      "test_id": 23,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.046
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.007
+      }
+    },
+    {
+      "test_id": 24,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.011
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.008
+      }
+    },
+    {
+      "test_id": 25,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.021
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.013
+      }
+    },
+    {
+      "test_id": 26,
+      "category": "implicit_join_cartesian",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.016
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.003
+      }
+    },
+    {
+      "test_id": 27,
+      "category": "implicit_join_cartesian",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.021
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.004
+      }
+    },
+    {
+      "test_id": 28,
+      "category": "implicit_join_cartesian",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.027
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.011
+      }
+    },
+    {
+      "test_id": 29,
+      "category": "implicit_join_cartesian",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.016
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.003
+      }
+    },
+    {
+      "test_id": 30,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.014
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.01
+      }
+    },
+    {
+      "test_id": 31,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.014
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.01
+      }
+    },
+    {
+      "test_id": 32,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.019
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.014
+      }
+    },
+    {
+      "test_id": 33,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.014
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.011
+      }
+    },
+    {
+      "test_id": 34,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.055
+      },
+      "rejected": {
+        "success": false,
+        "full_scan": false,
+        "time_ms": 0.014
+      }
+    },
+    {
+      "test_id": 35,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.016
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.009
+      }
+    },
+    {
+      "test_id": 36,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.01
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.008
+      }
+    },
+    {
+      "test_id": 37,
+      "category": "implicit_join_cartesian",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.028
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.008
+      }
+    },
+    {
+      "test_id": 38,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.02
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.014
+      }
+    },
+    {
+      "test_id": 39,
+      "category": "implicit_join_cartesian",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.029
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.005
+      }
+    },
+    {
+      "test_id": 40,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.027
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.015
+      }
+    },
+    {
+      "test_id": 41,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.012
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.01
+      }
+    },
+    {
+      "test_id": 42,
+      "category": "implicit_join_cartesian",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.026
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.004
+      }
+    },
+    {
+      "test_id": 43,
+      "category": "implicit_join_cartesian",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.031
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.008
+      }
+    },
+    {
+      "test_id": 44,
+      "category": "implicit_join_cartesian",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.021
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.004
+      }
+    },
+    {
+      "test_id": 45,
+      "category": "implicit_join_cartesian",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.019
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.004
+      }
+    },
+    {
+      "test_id": 46,
+      "category": "implicit_join_cartesian",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.016
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.003
+      }
+    },
+    {
+      "test_id": 47,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.018
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.016
+      }
+    },
+    {
+      "test_id": 48,
+      "category": "implicit_join_cartesian",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.029
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.009
+      }
+    },
+    {
+      "test_id": 49,
+      "category": "implicit_join_cartesian",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.02
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.004
+      }
+    },
+    {
+      "test_id": 50,
+      "category": "implicit_join_cartesian",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.028
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.004
+      }
+    },
+    {
+      "test_id": 51,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.011
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.008
+      }
+    },
+    {
+      "test_id": 52,
+      "category": "implicit_join_cartesian",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.023
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.003
+      }
+    },
+    {
+      "test_id": 53,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.01
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.008
+      }
+    },
+    {
+      "test_id": 54,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.018
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.014
+      }
+    },
+    {
+      "test_id": 55,
+      "category": "implicit_join_cartesian",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.021
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.007
+      }
+    },
+    {
+      "test_id": 56,
+      "category": "implicit_join_cartesian",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.031
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.007
+      }
+    },
+    {
+      "test_id": 57,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.011
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.008
+      }
+    },
+    {
+      "test_id": 58,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.01
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.008
+      }
+    },
+    {
+      "test_id": 59,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.017
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.012
+      }
+    },
+    {
+      "test_id": 60,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.02
+      },
+      "rejected": {
+        "success": false,
+        "full_scan": false,
+        "time_ms": 0.013
+      }
+    },
+    {
+      "test_id": 61,
+      "category": "subquery_overhead",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.015
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.022
+      }
+    },
+    {
+      "test_id": 62,
+      "category": "implicit_join_cartesian",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.02
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.004
+      }
+    },
+    {
+      "test_id": 63,
+      "category": "implicit_join_cartesian",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.019
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.004
+      }
+    },
+    {
+      "test_id": 64,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.01
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.008
+      }
+    },
+    {
+      "test_id": 65,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.01
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.007
+      }
+    },
+    {
+      "test_id": 66,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.015
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.009
+      }
+    },
+    {
+      "test_id": 67,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.018
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.013
+      }
+    },
+    {
+      "test_id": 68,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.015
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.008
+      }
+    },
+    {
+      "test_id": 69,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.016
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.012
+      }
+    },
+    {
+      "test_id": 70,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.015
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.008
+      }
+    },
+    {
+      "test_id": 71,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.019
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.013
+      }
+    },
+    {
+      "test_id": 72,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.018
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.007
+      }
+    },
+    {
+      "test_id": 73,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.017
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.007
+      }
+    },
+    {
+      "test_id": 74,
+      "category": "subquery_overhead",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.012
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.013
+      }
+    },
+    {
+      "test_id": 75,
+      "category": "implicit_join_cartesian",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.024
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.007
+      }
+    },
+    {
+      "test_id": 76,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.026
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.021
+      }
+    },
+    {
+      "test_id": 77,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.021
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.017
+      }
+    },
+    {
+      "test_id": 78,
+      "category": "subquery_overhead",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.013
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.014
+      }
+    },
+    {
+      "test_id": 79,
+      "category": "implicit_join_cartesian",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.025
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.008
+      }
+    },
+    {
+      "test_id": 80,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.047
+      },
+      "rejected": {
+        "success": false,
+        "full_scan": false,
+        "time_ms": 0.013
+      }
+    },
+    {
+      "test_id": 81,
+      "category": "implicit_join_cartesian",
+      "chosen": {
+        "success": false,
+        "full_scan": false,
+        "time_ms": 0.015
+      },
+      "rejected": {
+        "success": false,
+        "full_scan": false,
+        "time_ms": 0.007
+      }
+    },
+    {
+      "test_id": 82,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.05
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.022
+      }
+    },
+    {
+      "test_id": 83,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.02
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.016
+      }
+    },
+    {
+      "test_id": 84,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.019
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.013
+      }
+    },
+    {
+      "test_id": 85,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.022
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.017
+      }
+    },
+    {
+      "test_id": 86,
+      "category": "unindexed_wildcard_projection",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.011
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.009
+      }
+    },
+    {
+      "test_id": 87,
+      "category": "implicit_join_cartesian",
+      "chosen": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.023
+      },
+      "rejected": {
+        "success": true,
+        "full_scan": true,
+        "time_ms": 0.004
+      }
+    }
+  ]
+}

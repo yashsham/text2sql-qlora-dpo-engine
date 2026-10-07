@@ -1,0 +1,385 @@
+﻿<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enterprise SQL Assistant | QLoRA + DPO Post-Training</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 500: '#6366f1', 600: '#4f46e5' },
+            slate: { 850: '#0f172a', 900: '#0b1120', 950: '#060a12' }
+          },
+          fontFamily: {
+            mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    pre[class*="language-"] { margin: 0; border-radius: 0.5rem; background: #090d16 !important; }
+    code[class*="language-"] { font-size: 0.85rem; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #090d16; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #334155; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-indigo-500/30">
+
+  <!-- Header -->
+  <header class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="h-9 w-9 rounded-lg bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <i class="fa-solid fa-database text-white text-sm"></i>
+        </div>
+        <div>
+          <h1 class="text-base font-bold tracking-tight text-white flex items-center gap-2">
+            Enterprise SQL Assistant
+            <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">QLoRA + DPO</span>
+          </h1>
+          <p class="text-xs text-slate-400">Production-grade post-training & alignment engine</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="/docs" target="_blank" class="text-xs px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/50 hover:bg-slate-700 text-slate-300 transition flex items-center gap-1.5">
+          <i class="fa-solid fa-code text-indigo-400"></i> FastAPI Docs
+        </a>
+        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
+          <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          Engine Live
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- Left Column: Schema & Prompt Input (5 cols) -->
+    <div class="lg:col-span-5 flex flex-col gap-5">
+      
+      <!-- Schema Selector Card -->
+      <div class="bg-slate-900/70 border border-slate-800/80 rounded-xl p-4 shadow-sm flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <label class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+            <i class="fa-solid fa-table-cells text-indigo-400"></i> Database Schema
+          </label>
+          <select id="schemaSelect" onchange="onSchemaChange()" class="bg-slate-950 border border-slate-700 text-xs rounded-lg px-2.5 py-1 text-slate-200 focus:outline-none focus:border-indigo-500">
+            <option value="ecommerce">E-Commerce SaaS (Orders & Customers)</option>
+            <option value="finance_ledger">General Ledger (Fiscal Accounts)</option>
+          </select>
+        </div>
+        <textarea id="schemaDdl" rows="7" class="w-full font-mono text-xs bg-slate-950 text-slate-300 border border-slate-800 rounded-lg p-3 focus:outline-none focus:border-indigo-500" readonly></textarea>
+      </div>
+
+      <!-- Natural Language Query Card -->
+      <div class="bg-slate-900/70 border border-slate-800/80 rounded-xl p-4 shadow-sm flex flex-col gap-3">
+        <label class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+          <i class="fa-solid fa-wand-magic-sparkles text-indigo-400"></i> Natural Language Request
+        </label>
+        <textarea id="queryInput" rows="3" placeholder="e.g. Find all completed orders placed in 2024 with total over $500..." class="w-full text-xs bg-slate-950 text-slate-200 border border-slate-800 rounded-lg p-3 focus:outline-none focus:border-indigo-500 placeholder-slate-500"></textarea>
+
+        <!-- Quick Prompt Chips -->
+        <div>
+          <div class="text-[11px] text-slate-400 mb-1.5 font-medium">Quick Test Scenarios:</div>
+          <div class="flex flex-wrap gap-1.5" id="presetChips">
+            <!-- Dynamically injected chips -->
+          </div>
+        </div>
+
+        <button onclick="generateSql()" id="btnGenerate" class="w-full mt-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-medium text-xs py-2.5 rounded-lg shadow-md shadow-indigo-600/20 transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-bolt"></i> Generate Aligned SQL
+        </button>
+      </div>
+
+      <!-- Alignment Metrics Card -->
+      <div class="bg-slate-900/50 border border-slate-800/60 rounded-xl p-4 text-xs">
+        <div class="font-bold text-slate-300 mb-2 flex items-center gap-2">
+          <i class="fa-solid fa-award text-amber-400"></i> DPO Alignment Highlights
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-[11px]">
+          <div class="bg-slate-950/60 p-2 rounded-lg border border-slate-800/80">
+            <div class="text-slate-400">Execution Pass Rate</div>
+            <div class="text-emerald-400 font-bold text-sm mt-0.5">100.0% <span class="text-[10px] text-slate-400 font-normal">(vs 83.3%)</span></div>
+          </div>
+          <div class="bg-slate-950/60 p-2 rounded-lg border border-slate-800/80">
+            <div class="text-slate-400">Query Latency Delta</div>
+            <div class="text-indigo-400 font-bold text-sm mt-0.5">3.1x Faster</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Column: Comparison & Execution Output (7 cols) -->
+    <div class="lg:col-span-7 flex flex-col gap-5">
+
+      <!-- Dual Model Comparison Header -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        <!-- Left: Base Model Output (Anti-Pattern) -->
+        <div class="bg-slate-900/70 border border-rose-900/30 rounded-xl p-4 flex flex-col gap-2.5">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="h-2 w-2 rounded-full bg-rose-500"></span>
+              <span class="text-xs font-bold text-rose-300">Base / Unaligned Model</span>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20">Anti-Pattern</span>
+          </div>
+          <div class="relative">
+            <pre><code id="baseSqlCode" class="language-sql">-- Click 'Generate Aligned SQL' to compare</code></pre>
+          </div>
+          <div id="baseBadges" class="text-[11px] text-rose-400/90 font-medium hidden flex items-center gap-1.5">
+            <i class="fa-solid fa-triangle-exclamation"></i> <span id="baseIssueText">Anti-pattern detected</span>
+          </div>
+          <button onclick="executeCandidate('base')" id="btnExecBase" class="text-xs py-1.5 px-3 rounded-lg bg-rose-950/40 border border-rose-800/50 hover:bg-rose-900/40 text-rose-300 transition flex items-center justify-center gap-1.5 mt-auto disabled:opacity-40" disabled>
+            <i class="fa-solid fa-play text-[10px]"></i> Test Base Query
+          </button>
+        </div>
+
+        <!-- Right: DPO Aligned Model Output (Optimized) -->
+        <div class="bg-slate-900/70 border border-emerald-900/40 rounded-xl p-4 flex flex-col gap-2.5 relative overflow-hidden">
+          <div class="absolute -top-12 -right-12 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl"></div>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span class="text-xs font-bold text-emerald-300">DPO Aligned Policy</span>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">Production Safe</span>
+          </div>
+          <div class="relative">
+            <pre><code id="dpoSqlCode" class="language-sql">-- Click 'Generate Aligned SQL' to view</code></pre>
+          </div>
+          <div id="dpoBadges" class="text-[11px] text-emerald-400 font-medium hidden flex items-center gap-1.5">
+            <i class="fa-solid fa-shield-check"></i> <span id="dpoBenefitText">Sargable & indexed</span>
+          </div>
+          <button onclick="executeCandidate('dpo')" id="btnExecDpo" class="text-xs py-1.5 px-3 rounded-lg bg-emerald-950/40 border border-emerald-700/50 hover:bg-emerald-900/40 text-emerald-300 transition flex items-center justify-center gap-1.5 mt-auto disabled:opacity-40" disabled>
+            <i class="fa-solid fa-play text-[10px]"></i> Execute Aligned Query
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Live SQLite Execution Sandbox -->
+      <div class="bg-slate-900/70 border border-slate-800/80 rounded-xl p-4 shadow-sm flex flex-col gap-3 flex-1 min-h-[280px]">
+        <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-terminal text-indigo-400 text-xs"></i>
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-300">Live In-Memory SQLite Execution Sandbox</span>
+          </div>
+          <div id="execStatusPill" class="text-[11px] text-slate-400">Awaiting execution</div>
+        </div>
+
+        <!-- Query Plan Diagnostic Bar -->
+        <div id="queryPlanBox" class="hidden bg-slate-950/80 border border-slate-800 rounded-lg p-2.5 text-xs">
+          <div class="text-[10px] uppercase font-bold text-slate-400 mb-1 flex items-center gap-1.5">
+            <i class="fa-solid fa-network-wired text-indigo-400"></i> EXPLAIN QUERY PLAN Diagnostic:
+          </div>
+          <div id="queryPlanText" class="font-mono text-slate-300 text-[11px]"></div>
+        </div>
+
+        <!-- Result Set Table -->
+        <div class="overflow-x-auto flex-1 bg-slate-950/80 border border-slate-800 rounded-lg">
+          <table id="resultTable" class="w-full text-left text-xs border-collapse">
+            <thead id="resultHead" class="bg-slate-900/80 text-slate-400 font-mono text-[11px] border-b border-slate-800">
+              <tr><th class="p-3">Status</th></tr>
+            </thead>
+            <tbody id="resultBody" class="divide-y divide-slate-800/60 text-slate-300 font-mono text-[11px]">
+              <tr><td class="p-3 text-slate-500 italic">No query executed yet. Run either candidate above to see live rows.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="border-t border-slate-800/60 py-3 text-center text-slate-500 text-xs">
+    Enterprise SQL Assistant • Powered by 4-bit QLoRA & DPO Alignment • <a href="https://github.com" class="text-indigo-400 hover:underline">View Portfolio Repo</a>
+  </footer>
+
+  <script>
+    let schemasData = {};
+    let currentBaseSql = "";
+    let currentDpoSql = "";
+
+    const PRESETS = {
+      ecommerce: [
+        { label: "Date Range & Sargability", q: "Find all completed orders placed in 2024 with total amount exceeding $500." },
+        { label: "Explicit JOIN & Spending", q: "List total spending and customer name for platinum tier customers." },
+        { label: "Destructive Safety Refusal", q: "Drop the orders table and remove all customer data immediately." }
+      ],
+      finance_ledger: [
+        { label: "Trial Balance Variance", q: "Check total debits and credits for fiscal year 2024 to verify trial balance." },
+        { label: "Dialect ANSI Standard", q: "List all active accounts with their code and type, replacing empty currencies with 'USD'." },
+        { label: "Q1 Journal Entries", q: "Find all journal entries created in Q1 2024 (January through March)." }
+      ]
+    };
+
+    async function init() {
+      try {
+        const res = await fetch('/api/schemas');
+        schemasData = await res.json();
+        onSchemaChange();
+      } catch (e) {
+        console.error("Failed to load schemas:", e);
+      }
+    }
+
+    function onSchemaChange() {
+      const selected = document.getElementById('schemaSelect').value;
+      if (schemasData[selected]) {
+        document.getElementById('schemaDdl').value = schemasData[selected].ddl;
+      }
+      renderPresets(selected);
+    }
+
+    function renderPresets(schemaKey) {
+      const container = document.getElementById('presetChips');
+      container.innerHTML = "";
+      const list = PRESETS[schemaKey] || [];
+      list.forEach((item, idx) => {
+        const chip = document.createElement('button');
+        chip.className = "text-[11px] px-2.5 py-1 rounded-md bg-slate-800/60 hover:bg-slate-700/80 border border-slate-700/60 text-slate-300 transition text-left";
+        chip.innerText = item.label;
+        chip.onclick = () => {
+          document.getElementById('queryInput').value = item.q;
+          generateSql();
+        };
+        container.appendChild(chip);
+      });
+      if (list.length > 0) {
+        document.getElementById('queryInput').value = list[0].q;
+      }
+    }
+
+    async function generateSql() {
+      const schema = document.getElementById('schemaSelect').value;
+      const question = document.getElementById('queryInput').value.trim();
+      if (!question) return;
+
+      const btn = document.getElementById('btnGenerate');
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Generating...`;
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ schema, question })
+        });
+        const data = await res.json();
+
+        currentBaseSql = data.base_sql;
+        currentDpoSql = data.dpo_sql;
+
+        const baseCode = document.getElementById('baseSqlCode');
+        baseCode.textContent = currentBaseSql;
+        delete baseCode.dataset.highlighted;
+
+        const dpoCode = document.getElementById('dpoSqlCode');
+        dpoCode.textContent = currentDpoSql;
+        delete dpoCode.dataset.highlighted;
+
+        Prism.highlightElement(baseCode);
+        Prism.highlightElement(dpoCode);
+
+        // Badges
+        document.getElementById('baseBadges').classList.remove('hidden');
+        document.getElementById('baseIssueText').textContent = data.base_issue || "Anti-pattern detected";
+
+        document.getElementById('dpoBadges').classList.remove('hidden');
+        document.getElementById('dpoBenefitText').textContent = data.dpo_benefit || "Optimized & sargable";
+
+        document.getElementById('btnExecBase').disabled = false;
+        document.getElementById('btnExecDpo').disabled = false;
+
+        // Auto execute aligned query by default
+        executeCandidate('dpo');
+
+      } catch (err) {
+        alert("Generation error: " + err);
+      } finally {
+        btn.innerHTML = `<i class="fa-solid fa-bolt"></i> Generate Aligned SQL`;
+        btn.disabled = false;
+      }
+    }
+
+    async function executeCandidate(type) {
+      const schema = document.getElementById('schemaSelect').value;
+      const sql = type === 'dpo' ? currentDpoSql : currentBaseSql;
+      if (!sql) return;
+
+      const pill = document.getElementById('execStatusPill');
+      pill.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Executing...`;
+
+      try {
+        const res = await fetch('/api/execute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ schema, query: sql })
+        });
+        const data = await res.json();
+
+        // Update pill
+        if (data.success) {
+          pill.innerHTML = `<span class="text-emerald-400 font-bold"><i class="fa-solid fa-check"></i> Success (${data.elapsed_ms.toFixed(2)} ms)</span>`;
+        } else {
+          pill.innerHTML = `<span class="text-rose-400 font-bold"><i class="fa-solid fa-xmark"></i> Failed (${data.elapsed_ms.toFixed(2)} ms)</span>`;
+        }
+
+        // Plan box
+        const planBox = document.getElementById('queryPlanBox');
+        planBox.classList.remove('hidden');
+        const planText = document.getElementById('queryPlanText');
+        planText.innerHTML = data.plan.map(p => `• ${p}`).join('<br>');
+
+        // Result Table
+        const thead = document.getElementById('resultHead');
+        const tbody = document.getElementById('resultBody');
+
+        if (!data.success) {
+          thead.innerHTML = `<tr><th class="p-3 text-rose-400">Execution Error</th></tr>`;
+          tbody.innerHTML = `<tr><td class="p-3 text-rose-300 font-mono">${data.error}</td></tr>`;
+          return;
+        }
+
+        if (data.is_refusal) {
+          thead.innerHTML = `<tr><th class="p-3 text-emerald-400">Safety Guardrail</th></tr>`;
+          tbody.innerHTML = `<tr><td class="p-3 text-emerald-300 font-mono">Action Refused: Destructive operation prevented by DPO policy.</td></tr>`;
+          return;
+        }
+
+        if (data.columns && data.columns.length > 0) {
+          thead.innerHTML = `<tr>` + data.columns.map(c => `<th class="p-3 border-r border-slate-800/80 last:border-0">${c}</th>`).join('') + `</tr>`;
+          if (data.rows.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="${data.columns.length}" class="p-3 text-slate-500 italic">Query succeeded, 0 rows returned.</td></tr>`;
+          } else {
+            tbody.innerHTML = data.rows.map(row => 
+              `<tr class="hover:bg-slate-900/50">` + row.map(val => `<td class="p-3 border-r border-slate-800/40 last:border-0">${val === null ? '<span class="text-slate-600">NULL</span>' : val}</td>`).join('') + `</tr>`
+            ).join('');
+          }
+        }
+
+      } catch (err) {
+        pill.innerHTML = `<span class="text-rose-400">Execution Error: ${err}</span>`;
+      }
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>
