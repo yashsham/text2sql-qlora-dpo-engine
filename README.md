@@ -119,6 +119,22 @@ python eval/evaluate_execution.py
 
 ---
 
+## 24/7 Global Deployment (Cloudflare Pages & Workers)
+
+The repository is pre-configured with **Cloudflare Pages Functions** (`functions/api/`) and `wrangler.toml` for 100% free, zero-cold-start global edge deployment across 300+ cities:
+
+1. Log in to [Cloudflare Dashboard](https://dash.cloudflare.com/) and go to **Compute (Workers & Pages)** -> **Create application** -> **Pages**.
+2. Click **Connect to Git** and select `yashsham/text2sql-qlora-dpo-engine`.
+3. In the build settings:
+   - **Framework preset**: `None`
+   - **Build command**: *(Leave blank)*
+   - **Build output directory**: `app/static`
+4. Click **Save and Deploy**.
+
+Within 30 seconds, Cloudflare will deploy both the modern UI and edge API functions to `https://text2sql-qlora-dpo-engine.pages.dev/` with 24/7 global uptime!
+
+---
+
 ## Training on Cloud GPUs (Google Colab / RunPod)
 
 Open [`notebooks/train_colab.ipynb`](notebooks/train_colab.ipynb) directly in Google Colab to run full GPU fine-tuning on a free T4/L4 instance and export merged GGUF model weights for Ollama.
