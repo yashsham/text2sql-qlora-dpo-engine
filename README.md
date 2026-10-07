@@ -6,8 +6,11 @@
 [![TRL](https://img.shields.io/badge/TRL-0.10.0-orange.svg)](https://github.com/huggingface/trl)
 [![BitsAndBytes](https://img.shields.io/badge/BitsAndBytes-4--bit_NF4-green.svg)](https://github.com/TimDettmers/bitsandbytes)
 [![Benchmark](https://img.shields.io/badge/Benchmark-SQLite_Execution_Accuracy-purple.svg)](eval/)
+[![Deep Dive & Interview Prep](https://img.shields.io/badge/Documentation-Why_What_How_Deep_Dive-blueviolet.svg)](PROJECT_DEEP_DIVE.md)
 
 An end-to-end, production-oriented post-training and alignment pipeline that adapts open-source language models (e.g., `Qwen/Qwen2.5-Coder-7B-Instruct` or `meta-llama/Llama-3.1-8B-Instruct`) into an enterprise-safe, dialect-strict, and index-optimized Text-to-SQL engine with a modern FastAPI web interface.
+
+> 📖 **[Read the Complete Why, What, How & Senior AI Interview Guide (PROJECT_DEEP_DIVE.md)](PROJECT_DEEP_DIVE.md)** for a deep mathematical derivation of DPO, QLoRA NF4 quantization trade-offs, and top 10 interview questions.
 
 ---
 
@@ -67,6 +70,16 @@ Evaluated inside an **isolated in-memory SQLite sandbox** across real benchmark 
 | **Index-Preserving Sargability** | 50.0% | **100.0%** | **+50.0%** |
 | **Destructive Command Refusal** | 0.0% (Allowed `DROP`) | **100.0% (Safe Refusal)** | **+100.0%** |
 | **Avg Query Execution Time** | 0.84 ms | **0.27 ms** | **3.1x faster** |
+
+---
+
+## Trained Model Weights & Artifacts
+
+The final aligned LoRA adapter weights are committed directly in the repository under [`outputs/dpo_adapter/`](outputs/dpo_adapter/):
+* **`adapter_model.safetensors`** (77.05 MB) — Aligned DPO rank-16 LoRA weights
+* **`adapter_config.json`** — Architecture configuration
+* **`tokenizer.json`** & **`tokenizer_config.json`** — ChatML tokenizer definitions
+* **`chat_template.jinja`** — Prompt template
 
 ---
 
