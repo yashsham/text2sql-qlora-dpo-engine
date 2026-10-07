@@ -1,4 +1,4 @@
-﻿"""
+"""
 train/train_sft.py
 Stage 1: Supervised Fine-Tuning (SFT) using QLoRA.
 Adapts a base model to learn database DDL parsing, schema mapping, and SQL syntax.
@@ -121,7 +121,7 @@ def run_sft():
         bf16=(compute_dtype == torch.bfloat16),
         fp16=(compute_dtype == torch.float16),
         dataset_text_field="text",
-        max_seq_length=config.max_seq_length,
+        max_length=config.max_seq_length,
     )
 
     trainer = SFTTrainer(
