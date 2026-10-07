@@ -1,4 +1,4 @@
-﻿"""
+"""
 train/train_dpo.py
 Stage 2: Direct Preference Optimization (DPO) using QLoRA.
 Aligns policy weights using (prompt, chosen, rejected) triplets to enforce:
@@ -147,7 +147,7 @@ def run_dpo():
         ref_model=None,  # With PEFT/QLoRA, DPOTrainer automatically disables adapter for ref_model!
         args=training_args,
         train_dataset=train_ds,
-        tokenizer=tokenizer,
+        processing_class=tokenizer,
         peft_config=peft_config,
     )
 

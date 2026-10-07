@@ -128,7 +128,7 @@ def run_sft():
         model=model,
         train_dataset=train_ds,
         args=training_args,
-        tokenizer=tokenizer,
+        processing_class=tokenizer,
     )
 
     print("\nStarting SFT training...")
